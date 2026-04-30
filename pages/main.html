@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SASTRA University – Admissions Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/chat.css">
+</head>
+<body>
+
+  <!-- ── NAVIGATION ──────────────────────────────────────── -->
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="logo">
+        <div class="logo-icon">S</div>
+        SASTRA <span class="logo-highlight">University</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#admission-process">Admission</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#videos">Videos</a></li>
+        <li><a href="#features">Why SASTRA</a></li>
+      </ul>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <a href="https://webstream.sastra.edu/sastraonline/application/loginManager/applicantInitialPage.jsp"
+         target="_blank" rel="noopener" class="btn btn-primary nav-apply-btn">Apply Now</a>
+    </div>
+  </nav>
+
+  <!-- ── HERO SECTION ────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        SASTRA · AI-Powered · Admissions 2026-27
+      </div>
+
+      <!-- Campus image with floating icons -->
+      <div class="hero-visual-wrapper">
+        <h1>
+          Welcome to<br>
+          <span class="highlight">SASTRA University</span>
+        </h1>
+        <div class="floating-icon icon-1" aria-hidden="true">💻</div>
+        <div class="floating-icon icon-2" aria-hidden="true">🔬</div>
+        <div class="floating-icon icon-3" aria-hidden="true">🚀</div>
+        <div class="floating-icon icon-4" aria-hidden="true">⚡</div>
+        <img src="../assets/images/sastra.png" alt="SASTRA Campus" class="hero-image">
+      </div>
+
+      <!-- Dynamic headline -->
+      <div>
+        <h1 class="hero-headline">
+          <span class="static-part">Don't Just</span>
+          <span class="dynamic-part"><span id="dynamic-word">Apply, Explore</span></span>
+        </h1>
+      </div>
+
+      <!-- Campus selector -->
+      <div class="program-selector">
+        <h3><span class="highlight">Select the campus</span></h3>
+        <div class="select-wrapper">
+          <select id="campus-dropdown" class="program-dropdown">
+            <option value="" disabled selected>Explore our campuses...</option>
+            <option value="thanjavur">Thanjavur</option>
+            <option value="kumbakonam">Kumbakonam</option>
+            <option value="chennai">Chennai</option>
+          </select>
+          <div class="select-arrow">▼</div>
+        </div>
+
+    </div><!-- /program-selector -->
+  </div><!-- /hero-content -->
+</section><!-- /hero -->
+
+  <!-- ── ADMISSION PROCESS ────────────────────────────────── -->
+  <section id="admission-process">
+    <div class="section-header">
+      <div class="section-tag">Our Process</div>
+      <h2>Your Journey to SASTRA</h2>
+    </div>
+
+    <div class="process-grid">
+      <div class="central-flag">🚩</div>
+
+      <div class="process-card card-1">
+        <div class="corner-orb">🔓</div>
+        <span style="color:var(--sastra-blue); font-weight:bold;">01</span>
+        <h3>Register Online</h3>
+        <p>Start your journey by creating an account on our AI-powered admission portal. It's fast and secure.</p>
+      </div>
+
+      <div class="process-card card-2">
+        <div class="corner-orb">📄</div>
+        <span style="color:var(--sastra-blue); font-weight:bold;">02</span>
+        <h3>Upload Documents</h3>
+        <p>Provide your academic credentials and certificates for our automated verification process.</p>
+      </div>
+
+      <div class="process-card card-3">
+        <div class="corner-orb">🤝</div>
+        <span style="color:var(--sastra-blue); font-weight:bold;">03</span>
+        <h3>Join Community</h3>
+        <p>Connect with our dynamic and supportive student community while your application is processed.</p>
+      </div>
+
+      <div class="process-card card-4">
+        <div class="corner-orb">🥷</div>
+        <span style="color:var(--sastra-blue); font-weight:bold;">04</span>
+        <h3>Success!</h3>
+        <p>Armed with confidence and quality education, you're ready to take on the tech industry.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ABOUT SECTION ────────────────────────────────────── -->
+  <section id="about">
+    <div class="section-header">
+      <div class="section-tag">About SASTRA</div>
+      <h2>Excellence in Education Since 1984</h2>
+      <p>SASTRA University stands as a beacon of academic excellence, innovation, and holistic development, shaping future leaders and innovators.</p>
+    </div>
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="card-icon">🎓</div>
+        <h3>Academic Excellence</h3>
+        <p>Ranked among India's top universities with NAAC A++ accreditation and NIRF recognition for outstanding academic performance.</p>
+      </div>
+      <div class="about-card">
+        <div class="card-icon">🔬</div>
+        <h3>Research &amp; Innovation</h3>
+        <p>State-of-the-art research facilities and collaborations with leading global institutions fostering groundbreaking discoveries.</p>
+      </div>
+      <div class="about-card">
+        <div class="card-icon">🌍</div>
+        <h3>Global Exposure</h3>
+        <p>International partnerships, exchange programs, and industry collaborations preparing students for global careers.</p>
+      </div>
+      <div class="about-card">
+        <div class="card-icon">💼</div>
+        <h3>Career Success</h3>
+        <p>Exceptional placement records with leading MNCs and startups, ensuring bright career prospects for all graduates.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── DEMO VIDEOS ──────────────────────────────────────── -->
+  <section id="videos" style="background: rgba(29, 78, 216, 0.02);">
+    <div class="section-header">
+      <div class="section-tag">Learn More</div>
+      <h2>Application Process Demo Videos</h2>
+      <p>Watch these helpful guides to understand the admission process and make your application journey smooth and hassle-free.</p>
+    </div>
+    <div class="videos-container">
+
+      <div class="video-card">
+        <div class="video-wrapper">
+          <video controls playsinline preload="metadata">
+            <source src="../assets/videos/demo.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="video-info">
+          <h3>Getting Started: Registration Guide</h3>
+          <p>A comprehensive walkthrough of creating your account and starting your SASTRA admission application.</p>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder">▶</div>
+        </div>
+        <div class="video-info">
+          <h3>Document Upload Tutorial</h3>
+          <p>Step-by-step instructions for uploading and verifying your academic documents and certificates.</p>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="video-wrapper">
+          <div class="video-placeholder">▶</div>
+        </div>
+        <div class="video-info">
+          <h3>Application Completion &amp; Payment</h3>
+          <p>Final steps to review your application, make payment, and submit successfully for admission.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── FEATURES SECTION ─────────────────────────────────── -->
+  <section id="features">
+    <div class="section-header">
+      <div class="section-tag">Why Choose SASTRA</div>
+      <h2>Your Gateway to Success</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">📚</div>
+        <h3>200+ Programs</h3>
+        <p>Diverse range of UG, PG, and Doctoral programs across multiple disciplines</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">👨‍🏫</div>
+        <h3>Expert Faculty</h3>
+        <p>Learn from renowned professors and industry experts with global experience</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🏆</div>
+        <h3>Top Rankings</h3>
+        <p>Consistently ranked among India's premier educational institutions</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🏢</div>
+        <h3>Industry Connect</h3>
+        <p>Strong ties with leading companies ensuring excellent internship opportunities</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── REGISTRATION CTA ─────────────────────────────────── -->
+  <section id="register" class="cta-section">
+    <div class="cta-content">
+      <h2>Ready to Begin Your Journey?</h2>
+      <p>Join thousands of successful alumni who have transformed their dreams into reality. Start your application today and take the first step towards a brilliant future.</p>
+      <a href="https://webstream.sastra.edu/sastraonline/application/loginManager/applicantInitialPage.jsp"
+         target="_blank" rel="noopener" class="btn-white">
+        Register Now for Admissions 2026-27
+      </a>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ───────────────────────────────────────────── -->
+  <footer>
+    <p>&copy; 2026 SASTRA University. All rights reserved.</p>
+    <p>Need help? Contact us at <a href="mailto:admissions@sastra.edu">admissions@sastra.edu</a></p>
+  </footer>
+
+  <!-- ── CHAT WIDGET ──────────────────────────────────────── -->
+  <div id="chat-widget">
+    <div id="chat-trigger-container">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path id="circlePath" d="M 50,50 m -35,0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="transparent"/>
+        <text font-size="11" font-family="'DM Sans', sans-serif" fill="#1d4ed8" font-weight="700" letter-spacing="1.5">
+          <textPath href="#circlePath" startOffset="0%" id="circle-text">
+            • AI BUDDY • FAQ HELP • AI BUDDY • FAQ HELP
+          </textPath>
+        </text>
+      </svg>
+      <div id="chat-trigger">🤖</div>
+    </div>
+
+    <div id="chat-window">
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <span class="chat-header-icon">🤖</span>
+          <span id="chat-title">Admissions Helpdesk</span>
+        </div>
+        <button id="close-chat">&times;</button>
+      </div>
+      <div id="chat-messages">
+        <div id="bot-welcome"></div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button id="send-btn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/chat.js"></script>
+</body>
+</html>

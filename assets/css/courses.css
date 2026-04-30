@@ -1,0 +1,30 @@
+   .courses-page {
+      min-height: 100vh;
+      padding: 100px 20px 60px;
+      background: #f8fafc;
+    }
+    .courses-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--sastra-blue, #1d4ed8);
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 32px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .courses-back:hover { opacity: 0.75; }
+    .courses-page .main-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .courses-page .title-underline {
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+      border-radius: 2px;
+      margin-bottom: 40px;
+    }
+
