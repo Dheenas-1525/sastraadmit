@@ -1,11 +1,10 @@
 /* ── SASTRA Service Worker ─────────────────────────────────────
-   Bump CACHE_NAME whenever you deploy new code so old caches
-   are discarded and users get fresh files on next visit.
+   Bump CACHE_NAME on every deployment so stale caches are
+   discarded and users always get fresh files.
    ─────────────────────────────────────────────────────────── */
-var CACHE_NAME = 'sastra-v1';
+const CACHE_NAME = 'sastra-v1';
 
-/* Critical assets pre-fetched on first install */
-var PRECACHE = [
+const PRECACHE = [
   '/index.html',
   '/pages/schools.html',
   '/pages/courses.html',
@@ -20,80 +19,142 @@ var PRECACHE = [
   '/assets/js/index.js'
 ];
 
-/* ── Install: cache the skeleton ──────────────────────────── */
-self.addEventListener('install', function (e) {
+/* ── Install ──────────────────────────────────────────────── */
+self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME)
-      .then(function (cache) { return cache.addAll(PRECACHE); })
-      .then(function () { return self.skipWaiting(); })
+      .then((c) => c.addAll(PRECACHE))
+      .then(() => self.skipWaiting())
   );
 });
 
-/* ── Activate: delete stale caches ───────────────────────── */
-self.addEventListener('activate', function (e) {
+/* ── Activate: remove old caches ─────────────────────────── */
+self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then(function (keys) {
-      return Promise.all(
-        keys.filter(function (k) { return k !== CACHE_NAME; })
-            .map(function (k) { return caches.delete(k); })
-      );
-    }).then(function () { return self.clients.claim(); })
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
-/* ── Fetch: smart caching per asset type ─────────────────── */
-self.addEventListener('fetch', function (e) {
-  var req = e.request;
-  var url = new URL(req.url);
+/* ── Video range-request handler ─────────────────────────────
+   Problem: browsers stream video using HTTP Range requests
+   (e.g. "bytes=0-1048576"). A plain SW cache stores a full
+   200 response and cannot answer a 206 Partial Content request,
+   so seeking and playback break.
 
-  /* 1. Skip non-GET and cross-origin (Google Fonts, CDNs) */
+   Solution:
+   1. First request  → fetch the FULL video (no Range header),
+                        cache it as a complete ArrayBuffer.
+   2. Every request  → slice the exact byte range from the
+                        cached buffer and return a proper 206.
+   ─────────────────────────────────────────────────────────── */
+function makeRangeResponse(buf, contentType, rangeHeader) {
+  const total = buf.byteLength;
+  let start = 0;
+  let end   = total - 1;
+
+  if (rangeHeader) {
+    const [s, e] = rangeHeader.replace('bytes=', '').split('-');
+    start = parseInt(s, 10);
+    end   = e ? parseInt(e, 10) : total - 1;
+  }
+
+  return new Response(buf.slice(start, end + 1), {
+    status: rangeHeader ? 206 : 200,
+    headers: {
+      'Content-Type':   contentType || 'video/mp4',
+      'Content-Length': String(end - start + 1),
+      'Content-Range':  `bytes ${start}-${end}/${total}`,
+      'Accept-Ranges':  'bytes'
+    }
+  });
+}
+
+async function serveVideo(req) {
+  const rangeHeader = req.headers.get('range');
+  const cacheKey    = new Request(req.url);
+  const cache       = await caches.open(CACHE_NAME);
+  const cached      = await cache.match(cacheKey);
+
+  /* Already cached — slice and serve instantly */
+  if (cached) {
+    const buf = await cached.arrayBuffer();
+    return makeRangeResponse(buf, cached.headers.get('Content-Type'), rangeHeader);
+  }
+
+  /* Not cached — fetch the full file (no Range header so we get a
+     complete 200, not a partial 206 that can't be stored cleanly) */
+  const res = await fetch(new Request(req.url, { headers: {} }));
+  if (!res.ok) return res;
+
+  const contentType = res.headers.get('Content-Type') || 'video/mp4';
+  const buf         = await res.arrayBuffer();
+
+  /* Store the full file for all future visits */
+  cache.put(cacheKey, new Response(buf.slice(0), {
+    status:  200,
+    headers: {
+      'Content-Type':   contentType,
+      'Content-Length': String(buf.byteLength),
+      'Accept-Ranges':  'bytes'
+    }
+  }));
+
+  /* Return the requested range to the browser right now */
+  return makeRangeResponse(buf, contentType, rangeHeader);
+}
+
+/* ── Main fetch handler ───────────────────────────────────── */
+self.addEventListener('fetch', (e) => {
+  const { request: req } = e;
+  const url = new URL(req.url);
+
+  /* Skip non-GET and cross-origin (Google Fonts, CDNs) */
   if (req.method !== 'GET' || url.origin !== location.origin) return;
 
-  /* 2. Skip videos — too large; range-request streaming must
-        go directly to the server/CDN, not through SW cache    */
-  if (url.pathname.indexOf('/assets/videos/') === 0) return;
+  /* Videos — range-request aware cache */
+  if (url.pathname.startsWith('/assets/videos/')) {
+    e.respondWith(serveVideo(req));
+    return;
+  }
 
-  /* 3. HTML pages — network-first so new deployments show up
-        immediately; fall back to cache when offline            */
-  if (req.headers.get('accept') && req.headers.get('accept').indexOf('text/html') !== -1) {
+  /* HTML — network-first so deployments show up immediately */
+  if (req.headers.get('accept')?.includes('text/html')) {
     e.respondWith(
       fetch(req)
-        .then(function (res) {
-          var copy = res.clone();
-          caches.open(CACHE_NAME).then(function (c) { c.put(req, copy); });
+        .then((res) => {
+          caches.open(CACHE_NAME).then((c) => c.put(req, res.clone()));
           return res;
         })
-        .catch(function () { return caches.match(req); })
+        .catch(() => caches.match(req))
     );
     return;
   }
 
-  /* 4. CSS / JS — stale-while-revalidate
-        Serve from cache instantly; refresh cache in background */
+  /* CSS / JS — stale-while-revalidate (instant serve, background refresh) */
   if (/\.(css|js)$/.test(url.pathname)) {
     e.respondWith(
-      caches.open(CACHE_NAME).then(function (cache) {
-        return cache.match(req).then(function (cached) {
-          var networkFetch = fetch(req).then(function (res) {
-            cache.put(req, res.clone());
-            return res;
-          });
-          return cached || networkFetch;
+      caches.open(CACHE_NAME).then(async (cache) => {
+        const cached      = await cache.match(req);
+        const networkFetch = fetch(req).then((res) => {
+          cache.put(req, res.clone());
+          return res;
         });
+        return cached || networkFetch;
       })
     );
     return;
   }
 
-  /* 5. Images — cache-first (images don't change often) */
+  /* Images — cache-first */
   e.respondWith(
-    caches.match(req).then(function (cached) {
+    caches.match(req).then((cached) => {
       if (cached) return cached;
-      return fetch(req).then(function (res) {
-        if (res.ok) {
-          var copy = res.clone();
-          caches.open(CACHE_NAME).then(function (c) { c.put(req, copy); });
-        }
+      return fetch(req).then((res) => {
+        if (res.ok) caches.open(CACHE_NAME).then((c) => c.put(req, res.clone()));
         return res;
       });
     })
