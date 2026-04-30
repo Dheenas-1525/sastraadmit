@@ -137,15 +137,13 @@
           <div class="dean-video-wrapper">
             <video controls playsinline webkit-playsinline preload="none"
                    poster="../assets/images/deans/ss.png">
-              <!-- MP4 (H.264) must come first — required for Android & all browsers -->
-              <source src="../assets/videos/deans/Dean_P&amp;D.mp4" type="video/mp4">
-              <!-- .mov fallback for Safari on older iOS/macOS only -->
-              <source src="../assets/videos/deans/Dean_P&amp;D.mov" type="video/quicktime">
+              <source data-src="../assets/videos/deans/Dean_P&D.mov" type="video/mp4">
+              <source data-src="../assets/videos/deans/Dean_P&D.mov" type="video/quicktime">
             </video>
             <div class="dean-play-overlay" aria-hidden="true">&#9654;</div>
           </div>
           <div class="dean-info">
-            <h3 class="dean-name">S.Swaminathan</h3>
+            <h3 class="dean-name">Dr. S. Swaminathan</h3>
             <p class="dean-school">Dean Planning and development</p>
           </div>
         </div>
@@ -153,28 +151,30 @@
         <div class="dean-card">
           <div class="dean-video-wrapper">
             <video controls playsinline webkit-playsinline preload="none"
-                   poster="../assets/images/cse.png">
-              <!-- <source src="your-video.mp4" type="video/mp4"> -->
+                   poster="../assets/images/deans/scbt.png">
+              <source data-src="../assets/videos/deans/Dean_SCBT.mov" type="video/mp4">
+              <source data-src="../assets/videos/deans/Dean_SCBT.mov" type="video/quicktime">
             </video>
             <div class="dean-play-overlay" aria-hidden="true">&#9654;</div>
           </div>
           <div class="dean-info">
-            <h3 class="dean-name">Dean's Name</h3>
-            <p class="dean-school">Computing (SoC)</p>
+            <h3 class="dean-name">Dr.K.S Rajan</h3>
+            <p class="dean-school">Dean of SCBT</p>
           </div>
         </div>
 
         <div class="dean-card">
           <div class="dean-video-wrapper">
             <video controls playsinline webkit-playsinline preload="none"
-                   poster="../assets/images/civil.png">
-              <!-- <source src="your-video.mp4" type="video/mp4"> -->
+                   poster="../assets/images/deans/soc.png">
+              <source data-src="../assets/videos/deans/Dean_SoC.mov" type="video/mp4">
+              <source data-src="../assets/videos/deans/Dean_SoC.mov" type="video/quicktime">
             </video>
             <div class="dean-play-overlay" aria-hidden="true">&#9654;</div>
           </div>
           <div class="dean-info">
-            <h3 class="dean-name">Dean's Name</h3>
-            <p class="dean-school">Civil Engineering (SoCE)</p>
+            <h3 class="dean-name">Dr. V.S Shankar Sriram</h3>
+            <p class="dean-school">Dean of SoC</p>
           </div>
         </div>
 
@@ -429,5 +429,6 @@
 
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/chat.js"></script>
+  <script src="../assets/js/videos.js"></script>
 </body>
 </html>
