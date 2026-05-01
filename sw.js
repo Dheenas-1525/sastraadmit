@@ -2,7 +2,7 @@
    Bump CACHE_NAME on every deployment so stale caches are
    discarded and users always get fresh files.
    ─────────────────────────────────────────────────────────── */
-const CACHE_NAME = 'sastra-v2';
+const CACHE_NAME = 'sastra-v3';
 
 const PRECACHE = [
   '/index.html',

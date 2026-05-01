@@ -18,7 +18,8 @@
     channelUrl   : 'https://www.youtube.com/@strsastrauniversity',
     maxVideos    : 6,
     cacheTTL     : 6 * 3600 * 1000,   /* 6 hours in ms          */
-    slideDuration: 4500,               /* ms per auto-advance     */
+    slideDuration: 4500,               /* ms per auto-advance    */
+    fadeMs       : 250,                /* crossfade duration ms  */
   };
 
   /* ── DOM references ────────────────────────────────────────── */
@@ -90,7 +91,7 @@
         throw new Error('no id');
       })
       .catch(function () {
-        /* Fallback: scrape YouTube channel page via CORS proxies */
+        /* Fallback: scrape YouTube channel page via load-balanced CORS proxies */
         var ytUrl = 'https://www.youtube.com/@' + CFG.handle;
         var proxies = shuffle([
           'https://corsproxy.io/?' + encodeURIComponent(ytUrl),
@@ -139,7 +140,7 @@
         return vids;
       })
       .catch(function () {
-        /* Fallback: fetch + parse RSS XML directly via CORS proxy */
+        /* Fallback: fetch + parse RSS XML directly via load-balanced CORS proxy */
         var proxies = shuffle([
           'https://corsproxy.io/?' + encodeURIComponent(rss),
           'https://api.allorigins.win/get?url=' + encodeURIComponent(rss)
@@ -174,67 +175,122 @@
       });
   }
 
-  /* ── Carousel ──────────────────────────────────────────────── */
-  var current  = 0;
-  var total    = 0;
-  var timer    = null;
-  var isPaused = false;
-  var videos   = [];
+  /* ── Carousel state ────────────────────────────────────────── */
+  var current      = 0;
+  var total        = 0;
+  var videos       = [];
+  var isPaused     = false;
+  var timer        = null;
+  var slideStarted = 0;   /* Date.now() when current slide timer began */
+  var slideLeft    = 0;   /* ms remaining on slide when paused         */
 
   function thumbUrl(id, hq) {
     return 'https://img.youtube.com/vi/' + id +
            (hq ? '/maxresdefault.jpg' : '/hqdefault.jpg');
   }
 
+  /* ── Progress bar helpers ──────────────────────────────────── */
+  function startProgress(ms) {
+    D.fill.style.transition = 'none';
+    D.fill.style.width = '0%';
+    void D.fill.offsetWidth;
+    D.fill.style.transition = 'width ' + ms + 'ms linear';
+    D.fill.style.width = '100%';
+  }
+
+  function freezeProgress() {
+    /* Read computed pixel width and lock it (stops the CSS animation) */
+    var w  = parseFloat(getComputedStyle(D.fill).width)               || 0;
+    var pw = parseFloat(getComputedStyle(D.fill.parentElement).width)  || 1;
+    D.fill.style.transition = 'none';
+    D.fill.style.width = (w / pw * 100).toFixed(2) + '%';
+  }
+
+  function continueProgress(ms) {
+    void D.fill.offsetWidth;
+    D.fill.style.transition = 'width ' + ms + 'ms linear';
+    D.fill.style.width = '100%';
+  }
+
+  /* ── Slide transition ──────────────────────────────────────── */
   function goTo(idx) {
     current = ((idx % total) + total) % total;
     var v = videos[current];
 
-    /* Zoom-in animation — remove class, force reflow, re-add */
-    D.mainImg.classList.remove('yt-anim-in');
-    void D.mainImg.offsetWidth;
-    D.mainImg.src = thumbUrl(v.id, true);
-    D.mainImg.onerror = function () {
-      this.src = thumbUrl(v.id, false);
-      this.onerror = null;
-    };
-    D.mainImg.alt = v.title;
-    D.mainImg.classList.add('yt-anim-in');
+    /* Crossfade: fade out → swap src → fade in */
+    D.mainImg.style.opacity = '0';
+    setTimeout(function () {
+      D.mainImg.src = thumbUrl(v.id, true);
+      D.mainImg.onerror = function () {
+        this.src = thumbUrl(v.id, false);
+        this.onerror = null;
+      };
+      D.mainImg.alt = v.title;
+      D.mainImg.style.opacity = '1';
+    }, CFG.fadeMs);
+
     D.mainTitle.textContent = v.title;
     D.mainThumb.dataset.vid = v.id;
 
-    /* Sync thumbnail strip active state */
+    /* Sync thumbnail strip */
     [].forEach.call(D.thumbs.querySelectorAll('.yt-thumb-item'), function (el, i) {
       el.classList.toggle('active', i === current);
     });
-    /* Sync dots active state */
+    /* Sync dots */
     [].forEach.call(D.dots.querySelectorAll('.yt-dot'), function (el, i) {
       el.classList.toggle('active', i === current);
     });
 
-    /* Scroll active thumbnail into horizontal center */
+    /* Scroll only the thumbnail strip horizontally — never scroll the page */
     var active = D.thumbs.querySelectorAll('.yt-thumb-item')[current];
-    if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    if (active) {
+      D.thumbs.scrollTo({
+        left: active.offsetLeft - (D.thumbs.offsetWidth / 2) + (active.offsetWidth / 2),
+        behavior: 'smooth'
+      });
+    }
+  }
 
-    /* Progress bar: reset then re-animate */
-    D.fill.style.transition = 'none';
-    D.fill.style.width = '0%';
-    void D.fill.offsetWidth;
-    D.fill.style.transition = 'width ' + CFG.slideDuration + 'ms linear';
-    D.fill.style.width = '100%';
+  /* ── Autoplay engine ───────────────────────────────────────── */
+  function scheduleNext(ms) {
+    clearTimeout(timer);
+    slideStarted = Date.now();
+    timer = setTimeout(function () {
+      goTo(current + 1);
+      startProgress(CFG.slideDuration);
+      scheduleNext(CFG.slideDuration);
+    }, ms);
+  }
+
+  function pause() {
+    if (isPaused) return;
+    isPaused = true;
+    slideLeft = Math.max(0, CFG.slideDuration - (Date.now() - slideStarted));
+    clearTimeout(timer);
+    freezeProgress();
+  }
+
+  function resume() {
+    if (!isPaused) return;
+    isPaused = false;
+    var rem = slideLeft > 0 ? slideLeft : CFG.slideDuration;
+    continueProgress(rem);
+    scheduleNext(rem);
   }
 
   function startAutoplay() {
-    clearInterval(timer);
-    timer = setInterval(function () {
-      if (!isPaused) goTo(current + 1);
-    }, CFG.slideDuration);
+    startProgress(CFG.slideDuration);
+    scheduleNext(CFG.slideDuration);
   }
 
+  /* ── Build carousel ────────────────────────────────────────── */
   function buildCarousel(vids) {
     videos = vids;
     total  = videos.length;
     if (!total) { setState('error'); return; }
+
+    /* Enable opacity crossfade on the main image */
+    D.mainImg.style.transition = 'opacity ' + CFG.fadeMs + 'ms ease';
 
     /* Render thumbnail strip and dot navigation */
     D.thumbs.innerHTML = '';
@@ -243,7 +299,7 @@
     videos.forEach(function (v, i) {
       /* Thumbnail */
       var item = document.createElement('div');
-      item.className    = 'yt-thumb-item';
+      item.className     = 'yt-thumb-item';
       item.dataset.index = i;
       item.setAttribute('role', 'listitem');
       var img = document.createElement('img');
@@ -264,12 +320,13 @@
 
     /* ── Events ── */
 
-    /* Thumbnail strip click (event-delegation) */
+    /* Thumbnail strip click */
     D.thumbs.addEventListener('click', function (e) {
       var item = e.target.closest('.yt-thumb-item');
       if (!item) return;
       goTo(+item.dataset.index);
-      startAutoplay();
+      startProgress(CFG.slideDuration);
+      scheduleNext(CFG.slideDuration);
     });
 
     /* Dot navigation click */
@@ -277,7 +334,8 @@
       var dot = e.target.closest('.yt-dot');
       if (!dot) return;
       goTo(+dot.dataset.index);
-      startAutoplay();
+      startProgress(CFG.slideDuration);
+      scheduleNext(CFG.slideDuration);
     });
 
     /* Main thumbnail click → open video on YouTube */
@@ -291,15 +349,15 @@
     /* Keyboard: Enter/Space = open, Arrow = navigate */
     D.mainThumb.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); }
-      if (e.key === 'ArrowRight') { goTo(current + 1); startAutoplay(); }
-      if (e.key === 'ArrowLeft')  { goTo(current - 1); startAutoplay(); }
+      if (e.key === 'ArrowRight') { goTo(current + 1); startProgress(CFG.slideDuration); scheduleNext(CFG.slideDuration); }
+      if (e.key === 'ArrowLeft')  { goTo(current - 1); startProgress(CFG.slideDuration); scheduleNext(CFG.slideDuration); }
     });
 
-    /* Pause autoplay on hover or keyboard focus */
-    D.wrap.addEventListener('mouseenter', function () { isPaused = true; });
-    D.wrap.addEventListener('mouseleave', function () { isPaused = false; });
-    D.wrap.addEventListener('focusin',    function () { isPaused = true; });
-    D.wrap.addEventListener('focusout',   function () { isPaused = false; });
+    /* Pause on hover / focus — progress bar freezes too */
+    D.wrap.addEventListener('mouseenter', pause);
+    D.wrap.addEventListener('mouseleave', resume);
+    D.wrap.addEventListener('focusin',    pause);
+    D.wrap.addEventListener('focusout',   resume);
 
     /* Touch swipe on main display (iOS, Android) */
     var tx = 0, ty = 0;
@@ -314,13 +372,21 @@
       /* Only trigger on horizontal swipe; ignore vertical scroll */
       if (Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(dy)) {
         goTo(dx > 0 ? current + 1 : current - 1);
-        startAutoplay();
+        startProgress(CFG.slideDuration);
+        scheduleNext(CFG.slideDuration);
       }
     }, { passive: true });
+
+    /* Page visibility — pause when tab is hidden, resume when visible */
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { pause(); } else { resume(); }
+    });
 
     /* Slow down for users who prefer reduced motion */
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       CFG.slideDuration = 9000;
+      CFG.fadeMs = 0;
+      D.mainImg.style.transition = 'none';
     }
 
     setState('ready');
