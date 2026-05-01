@@ -2,7 +2,7 @@
    Bump CACHE_NAME on every deployment so stale caches are
    discarded and users always get fresh files.
    ─────────────────────────────────────────────────────────── */
-const CACHE_NAME = 'sastra-v1';
+const CACHE_NAME = 'sastra-v2';
 
 const PRECACHE = [
   '/index.html',
@@ -15,7 +15,7 @@ const PRECACHE = [
   '/assets/css/index.css',
   '/assets/js/main.js',
   '/assets/js/chat.js',
-  '/assets/js/videos.js',
+  '/assets/js/youtube.js',
   '/assets/js/index.js'
 ];
 
@@ -112,8 +112,26 @@ self.addEventListener('fetch', (e) => {
   const { request: req } = e;
   const url = new URL(req.url);
 
-  /* Skip non-GET and cross-origin (Google Fonts, CDNs) */
-  if (req.method !== 'GET' || url.origin !== location.origin) return;
+  /* Skip non-GET */
+  if (req.method !== 'GET') return;
+
+  /* YouTube thumbnails (cross-origin) — cache-first so the carousel
+     loads instantly on repeat visits without hitting YouTube's CDN */
+  if (url.hostname === 'img.youtube.com') {
+    e.respondWith(
+      caches.match(req).then((cached) => {
+        if (cached) return cached;
+        return fetch(req).then((res) => {
+          if (res.ok) caches.open(CACHE_NAME).then((c) => c.put(req, res.clone()));
+          return res;
+        });
+      })
+    );
+    return;
+  }
+
+  /* Skip remaining cross-origin (Google Fonts, CDNs, API proxies) */
+  if (url.origin !== location.origin) return;
 
   /* Videos — range-request aware cache */
   if (url.pathname.startsWith('/assets/videos/')) {

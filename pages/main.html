@@ -20,7 +20,7 @@
       <ul class="nav-links">
         <li><a href="#admission-process">Admission</a></li>
         <li><a href="#about">About</a></li>
-        <li><a href="#videos">Videos</a></li>
+        <li><a href="#youtube-showcase">Videos</a></li>
         <li><a href="#features">Why SASTRA</a></li>
       </ul>
       <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
@@ -207,48 +207,75 @@
     </div><!-- /leadership-slider -->
   </section>
 
-  <!-- ── DEMO VIDEOS ──────────────────────────────────────── -->
-  <section id="videos" style="background: rgba(29, 78, 216, 0.02);">
-    <div class="section-header">
-      <div class="section-tag">Learn More</div>
-      <h2>Application Process Demo Videos</h2>
-      <p>Watch these helpful guides to understand the admission process and make your application journey smooth and hassle-free.</p>
+  <!-- ── YOUTUBE SHOWCASE ──────────────────────────────────── -->
+  <section id="youtube-showcase">
+    <div class="section-header yt-header">
+      <div class="section-tag">Watch &amp; Learn</div>
+      <h2>SASTRA on YouTube</h2>
+      <p>Campus life, academic insights, and student success stories — from our official channel.</p>
     </div>
-    <div class="videos-container">
 
-      <div class="video-card">
-        <div class="video-wrapper">
-          <video controls playsinline preload="metadata">
-            <source src="../assets/videos/demo.mp4" type="video/mp4">
-          </video>
-        </div>
-        <div class="video-info">
-          <h3>Getting Started: Registration Guide</h3>
-          <p>A comprehensive walkthrough of creating your account and starting your SASTRA admission application.</p>
-        </div>
+    <div class="yt-showcase-wrap">
+
+      <!-- Loading state -->
+      <div class="yt-loading" id="ytLoading">
+        <div class="yt-spinner"></div>
+        <p>Loading latest videos&hellip;</p>
       </div>
 
-      <div class="video-card">
-        <div class="video-wrapper">
-          <div class="video-placeholder">▶</div>
+      <!-- Error / fallback state -->
+      <div class="yt-error" id="ytError" style="display:none">
+        <div class="yt-error-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z" fill="currentColor"/></svg>
         </div>
-        <div class="video-info">
-          <h3>Document Upload Tutorial</h3>
-          <p>Step-by-step instructions for uploading and verifying your academic documents and certificates.</p>
-        </div>
+        <p>Visit our YouTube channel for the latest videos</p>
+        <a href="https://www.youtube.com/@strsastrauniversity" target="_blank" rel="noopener" class="yt-error-btn">
+          Open SASTRA YouTube Channel &#8599;
+        </a>
       </div>
 
-      <div class="video-card">
-        <div class="video-wrapper">
-          <div class="video-placeholder">▶</div>
-        </div>
-        <div class="video-info">
-          <h3>Application Completion &amp; Payment</h3>
-          <p>Final steps to review your application, make payment, and submit successfully for admission.</p>
-        </div>
-      </div>
+      <!-- Carousel (shown once videos load) -->
+      <div class="yt-carousel" id="ytCarousel" style="display:none">
 
-    </div>
+        <!-- Device frame with corner brackets -->
+        <div class="yt-device-frame">
+          <span class="yt-corner yt-tl" aria-hidden="true"></span>
+          <span class="yt-corner yt-tr" aria-hidden="true"></span>
+          <span class="yt-corner yt-bl" aria-hidden="true"></span>
+          <span class="yt-corner yt-br" aria-hidden="true"></span>
+
+          <div class="yt-main-thumb" id="ytMainThumb" role="button" tabindex="0" aria-label="Watch on YouTube">
+            <img id="ytMainImg" src="" alt="" decoding="async">
+            <div class="yt-play-btn" aria-hidden="true"></div>
+            <div class="yt-title-overlay">
+              <span id="ytMainTitle"></span>
+              <small class="yt-watch-label">Watch on YouTube &#8599;</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide progress bar -->
+        <div class="yt-progress-bar" aria-hidden="true">
+          <div class="yt-progress-fill" id="ytProgressFill"></div>
+        </div>
+
+        <!-- Thumbnail strip (built by JS) -->
+        <div class="yt-thumbs" id="ytThumbs" role="list" aria-label="Video thumbnails"></div>
+
+        <!-- Dot indicators (built by JS) -->
+        <div class="yt-dots" id="ytDots" role="tablist" aria-label="Video navigation"></div>
+
+        <!-- Subscribe link -->
+        <div class="yt-subscribe-row">
+          <a href="https://www.youtube.com/@strsastrauniversity" target="_blank" rel="noopener" class="yt-subscribe-btn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z" fill="currentColor"/></svg>
+            Subscribe to SASTRA University
+          </a>
+        </div>
+
+      </div><!-- /yt-carousel -->
+
+    </div><!-- /yt-showcase-wrap -->
   </section>
 
   <!-- ── FEATURES SECTION ─────────────────────────────────── -->
@@ -379,5 +406,7 @@
       navigator.serviceWorker.register('/sw.js');
     }
   </script>
+
+  <script src="../assets/js/youtube.js"></script>
 </body>
 </html>
